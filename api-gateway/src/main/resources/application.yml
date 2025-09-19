@@ -1,0 +1,46 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/users/**, /api/auth/**
+        - id: property-service
+          uri: lb://property-service
+          predicates:
+            - Path=/api/properties/**, /api/floors/**, /api/units/**
+        - id: user-service-docs
+          uri: lb://user-service
+          predicates:
+            - Path=/v3/api-docs/user-service
+          filters:
+            - RewritePath=/v3/api-docs/user-service, /v3/api-docs
+        - id: property-service-docs
+          uri: lb://property-service
+          predicates:
+            - Path=/v3/api-docs/property-service
+          filters:
+            - RewritePath=/v3/api-docs/property-service, /v3/api-docs
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: user-service
+        url: /v3/api-docs/user-service
+      - name: property-service
+        url: /v3/api-docs/property-service
